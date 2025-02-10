@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <title>Exercício do Pássaro</title> <!-- Define o título da página, que aparece na aba do navegador -->
+    <style>
+        body {
+            display: flex; /* Usa o modelo de layout flexível para centralizar elementos */
+            justify-content: center; /* Centraliza os elementos horizontalmente */
+            align-items: center; /* Centraliza os elementos verticalmente */
+            height: 100vh;
+            margin: 0;  }
+    </style>
+</head>
+<body>
+
+<script>
+    //Variável que define as configurações do jogo, no caso a resolução da tela e as funções 
+    var config = {  
+        type: Phaser.AUTO,
+        width: 800, //Largura da tela
+        height: 600, //Altura da tela
+
+        //Define as funções que a cena vai ter
+        scene: {   
+            preload: preload, //Serve pra carregar arquivos antes do jogo começar
+            create: create, //Configura os elementos do jogo
+            update: update, //Atualiza o jogo a cada quadro
+        }
+    };
+
+    var game = new Phaser.Game(config); // A variável game usa as configurações definidas em config para iniciar o jogo.
+   
+    var passarinho // Variável que armazenará o sprite do passarinho
+
+    //Carrega a imagem do fundo do jogo e a do pássaro e o nomes 'bg' e 'bird' serão usado como chave para referenciar cada imagem
+    function preload() { 
+        this.load.image('bg', 'assets/bg_space.png');
+        this.load.spritesheet('bird', 'assets/bird-purple.png', {frameWidth: 75, frameHeight: 75});
+    }
+
+    //Adiciona as imagems que tínhamos carregado na tela do jogo, por meio das chaves 'bg' e 'bird'
+    function create(){ 
+
+        this.add.image(400, 300, 'bg').setScale(1.2);
+        passarinho = this.add.sprite(100, 300, 'bird').setScale(1.3);// Cria o sprite do passarinho e armazena na variável 'passarinho'
+
+        //Cria a animação do pássaro 
+        this.anims.create({
+            key: 'fly',
+            frames: this.anims.generateFrameNumbers('bird', {start: 0, end: 7}), // Gera os quadros da animação a partir do sprite 'bird', indo do frame 0 ao 7
+            framerate: 10,  // Velocidade da animação (10 quadros por segundo)
+            repeat: -1,  // -1 significa que a animação será repetida infinitamente
+        });
+
+        // Inicia a animação do passarinho com a chave 'fly' que críamos anteriormente
+        passarinho.anims.play('fly', true); 
+    }
+
+    //Atualiza o jogo e é rodado repetidamente
+    function update(){ 
+
+        //Condições pro passarinho andar de um lado pro outro
+        if (passarinho.x === 100){  // Verifica se o passarinho está na posição original, ou seja, x = 100, no lado esquerdo da tela
+            passarinho.setFlip(false,false); // Se for verdade, mantém a imagem do passarinho sem espelhamento, pois ele começa voltado para a direita.
+            passarinho.ida = true; //Como ele ainda está do lado esquerdo da tela, ele ainda se encontra no caminho de ida, por isso, passarinho.ida = true
+        }
+
+        if (passarinho.x < 700 && passarinho.ida === true ){ // Verifica se o passarinho já chegou ao 'final' da tela no lado direito e se ainda está no caminho de ida
+            console.log('O que acontece? Como o passarinho ainda não chegou ao limite da tela no lado esquerdo, ou seja, x = 700, vamos adicionar 5 a sua posição x até que ele chegue lá'); 
+            passarinho.x += 5; // Se as duas condições forem verdadeiras, esse comando manda adicionar 5 na posição x do pássaro até outra condição ser atendida
+        }
+
+        if (passarinho.x === 700){  // Verifica se o passarinho atingiu o 'limite' de x = 700, ou seja, se ele está no lado direito da tela
+            passarinho.setFlip(true,false);  // Espelha a imagem no eixo X para que ele fique virado para a esquerda, preparando para voltar.
+            passarinho.ida = false; // Ele já chegou ao limite do lado direito da tela e, por isso, o caminho de ida já foi concluído, agora ele deve voltar
+        }
+
+        if (passarinho.x > 100 && passarinho.ida === false){ //verifica se o passarinho não está mais no seu ponto de origem e se ele já está no seu caminho de volta
+            console.log('O que acontece agora? Como o passarinho está no seu caminho de volta, vamos tirar 5 da sua posição x até que ele chegou ao ponto de origem');
+            passarinho.x -= 5; // se as duas condições forem verdadeiras, esse comando retira 5 da posição x do pássaro, ou seja, faz ele voltar ao seu ponto de origem.
+        } 
+
+        // Movimento vertical com a estrutura de repetição while
+
+        var passos = 0; // Limita o número de passos por frame para evitar congelamento
+        while (passos < 3) { // Move o pássaro um pequeno número de pixels por update
+            if (passarinho.subida) {
+                passarinho.y += 2; // Subindo
+            } else {
+                passarinho.y -= 2; // Descendo
+            }
+            passos++; // Incrementa o contador para não entrar em loop infinito
+        }
+
+        // Verifica limites e troca a direção(subida ou descida)
+        if (passarinho.y <= 50){  //Verifica se o pássaro está no limite inferior da tela
+            passarinho.subida = true;  // Se sim, ele coloca a subida como true
+        }
+
+        if (passarinho.y >= 550){ //Verifica se o pássaro está no limite superior da tela
+            passarinho.subida = false; //Se sim, ele coloca a subida como false, porque o pássaro já subiu, agora ele deve descer
+        }      
+    }
+</script>
+
+</body>
+</html>
